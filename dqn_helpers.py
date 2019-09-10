@@ -1,7 +1,10 @@
 import time
 import cv2
 import numpy as np
+import dqn_params as param
+import tensorflow as tf
 from cv_bridge import CvBridge
+import pickle
 
 
 def tic():
@@ -16,7 +19,7 @@ def toc():
 
     t_sec = round(time.time() - _start_time)
     (t_min, t_sec) = divmod(t_sec, 60)
-    (t_hour,t_min) = divmod(t_min, 60)
+    (t_hour, t_min) = divmod(t_min, 60)
 
     return '%f hours: %f mins: %f secs' % (t_hour, t_min, t_sec)
 
@@ -50,18 +53,44 @@ def construct_input(position, direction, camera, laser):
     return np.concatenate((position, [direction], camera, laser))
 
 
-def normalize_input(input):
-    minp, maxinp = np.min(input), np.max(input)
-    normalized_inp = (input - minp) / (maxinp - minp)
+def normalize_input(input_):
+    min_input, max_input = np.min(input_), np.max(input_)
+    normalized_input = (input_ - min_input) / (max_input - min_input)
 
-    return normalized_inp[np.newaxis, :]
+    return normalized_input[np.newaxis, :]
 
 
 def get_observation(raw_data):
     position = process_position(raw_data['position'])
     direction = float(raw_data['direction'].data)
-    camera, laser = process_camera(raw_data['camera']), \
-                    process_laser(raw_data['laser'])
-    input = construct_input(position, direction, camera, laser)
+    camera = process_camera(raw_data['camera'])
+    laser = process_laser(raw_data['laser'])
 
-    return position, normalize_input(input)
+    input_ = construct_input(position, direction, camera, laser)
+
+    return position, normalize_input(input_)
+
+
+def update_network(dqn, state, next_state, reward):
+    with tf.GradientTape() as g:
+        prediction_q = dqn.feedforward(state)
+        target_q = dqn.feedforward(next_state)
+        target = tf.cast(reward + param.gamma * np.max(target_q), tf.float32)
+        loss = q_primary.get_loss(target, prediction_q)
+
+        trainable_vars = list(dqn.weights.values()) + list(dqn.biases.values())
+        gradients = g.gradient(loss, trainable_vars)
+        network.optimizer.apply_gradients(zip(gradients, trainable_vars))
+
+    return loss.numpy()
+
+
+def save_objects(dqn, episode):
+    pickle.dump(param.loss_of_episodes, open(param.res_folder + 'loss_of_episodes.pkl', 'wb'))
+    pickle.dump(param.reward_of_episodes, open(param.res_folder + 'reward_of_episodes.pkl', 'wb'))
+    pickle.dump(param.step_of_episodes, open(param.res_folder + 'step_of_episodes.pkl', 'wb'))
+    pickle.dump(param.target_scores, open(param.res_folder + 'target_scores.pkl', 'wb'))
+    pickle.dump(param.reward_visits, open(param.res_folder + 'reward_visits.pkl', 'wb'))
+
+    pickle.dump(dqn.weights, open(param.res_folder + 'weights.pkl', 'wb'))
+    pickle.dump(dqn.biases, open(param.res_folder + 'biases.pkl', 'wb'))

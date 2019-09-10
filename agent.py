@@ -7,6 +7,7 @@ class Agent(object):
 
     def __init__(self, alpha, n_observations, n_actions, h_units=256):
         self.optimizer = tf.optimizers.RMSprop(alpha)
+        
         self.weights = {
             'hidden1': tf.Variable(inits(shape=(n_observations, h_units))),
             'hidden2': tf.Variable(inits(shape=(h_units, h_units))),
