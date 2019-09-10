@@ -6,5 +6,5 @@ This repository contains the code to reproduce the results obtained for the IRIM
 
 ## Brief description of the repository folders
 **dqn_main_results**: This folder contains the results obtained from the experiment and the weights and biases of the network after the training. \
-**template_husky_0_0_0_0**: This folder contains the model of the maze, of the Husky robot and the transfer function used to make the robot be able to navigate the environment. \
+**template_husky_0**: This folder contains the model of the maze, of the Husky robot and the transfer function used to make the robot be able to navigate the environment. \
 **plots**: This folder contains some plots for the visualization on the video stream, which are updated at every step (for example, the current position of the robot, the score and the loss function).
