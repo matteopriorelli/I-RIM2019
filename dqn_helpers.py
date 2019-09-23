@@ -76,21 +76,28 @@ def update_network(dqn, state, next_state, reward):
         prediction_q = dqn.feedforward(state)
         target_q = dqn.feedforward(next_state)
         target = tf.cast(reward + param.gamma * np.max(target_q), tf.float32)
-        loss = q_primary.get_loss(target, prediction_q)
+        loss = dqn.get_loss(target, prediction_q)
 
         trainable_vars = list(dqn.weights.values()) + list(dqn.biases.values())
         gradients = g.gradient(loss, trainable_vars)
-        network.optimizer.apply_gradients(zip(gradients, trainable_vars))
+        dqn.optimizer.apply_gradients(zip(gradients, trainable_vars))
 
     return loss.numpy()
 
 
-def save_objects(dqn, episode):
-    pickle.dump(param.loss_of_episodes, open(param.res_folder + 'loss_of_episodes.pkl', 'wb'))
-    pickle.dump(param.reward_of_episodes, open(param.res_folder + 'reward_of_episodes.pkl', 'wb'))
-    pickle.dump(param.step_of_episodes, open(param.res_folder + 'step_of_episodes.pkl', 'wb'))
-    pickle.dump(param.target_scores, open(param.res_folder + 'target_scores.pkl', 'wb'))
-    pickle.dump(param.reward_visits, open(param.res_folder + 'reward_visits.pkl', 'wb'))
+def save_objects(network, episode):
+    pickle.dump(param.loss_of_episodes, open(param.res_folder + 'loss_of_episodes_%d.pkl'
+                                             % episode, 'wb'))
+    pickle.dump(param.reward_of_episodes, open(param.res_folder + 'reward_of_episodes_%d.pkl'
+                                               % episode, 'wb'))
+    pickle.dump(param.step_of_episodes, open(param.res_folder + 'step_of_episodes_%d.pkl'
+                                             % episode, 'wb'))
+    pickle.dump(param.target_scores, open(param.res_folder + 'target_scores_%d.pkl'
+                                          % episode, 'wb'))
+    pickle.dump(param.reward_visits, open(param.res_folder + 'reward_visits_%d.pkl'
+                                          % episode, 'wb'))
 
-    pickle.dump(dqn.weights, open(param.res_folder + 'weights.pkl', 'wb'))
-    pickle.dump(dqn.biases, open(param.res_folder + 'biases.pkl', 'wb'))
+    pickle.dump(network.weights, open(param.res_folder + 'weights_%d.pkl'
+                                      % episode, 'wb'))
+    pickle.dump(network.biases, open(param.res_folder + 'biases_%d.pkl'
+                                     % episode, 'wb'))

@@ -8,13 +8,15 @@ def running_average(x, window_size, mode='valid'):
     return np.convolve(x, np.ones(window_size) / window_size, mode=mode)
 
 
-target_scores = pickle.load(open(param.res_folder + 'target_scores.pkl', 'rb'))
-reward_of_episodes = pickle.load(open(param.res_folder + 'reward_of_episodes.pkl', 'rb'))
-step_of_episodes = pickle.load(open(param.res_folder + 'step_of_episodes.pkl', 'rb'))
-loss_of_episodes = pickle.load(open(param.res_folder + 'loss_of_episodes.pkl', 'rb'))
-reward_visits = pickle.load(open(param.res_folder + 'reward_visits.pkl', 'rb'))
+episode = 1000
 
-w = len(target_scores) / 5
+target_scores = pickle.load(open(param.res_folder + 'target_scores_%d.pkl' % episode, 'rb'))
+reward_of_episodes = pickle.load(open(param.res_folder + 'reward_of_episodes_%d.pkl' % episode, 'rb'))
+step_of_episodes = pickle.load(open(param.res_folder + 'step_of_episodes_%d.pkl' % episode, 'rb'))
+loss_of_episodes = pickle.load(open(param.res_folder + 'loss_of_episodes_%d.pkl' % episode, 'rb'))
+reward_visits = pickle.load(open(param.res_folder + 'reward_visits_%d.pkl' % episode, 'rb'))
+
+w = episode / 5
 
 fig1 = sns.plt.figure(1)
 target_scores_plot = fig1.add_subplot(311)
